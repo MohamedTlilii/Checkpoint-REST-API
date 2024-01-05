@@ -5,13 +5,13 @@ const userSchema = new Schema(
   {
     name: {
       type: String,
-      required: [true, "The name field is required"],
+      // required: [true, "The name field is required"],
     },
     age: {
       type: Number,
     },
     favoriteFoods: {
-      favoritFoods: [String],
+      type: [String],
     },
   },
   {
@@ -20,4 +20,4 @@ const userSchema = new Schema(
 );
 
 // Export the model correctly
-module.exports = mongoose.model("User", userSchema);
+module.exports = mongoose.model("Users", userSchema);
