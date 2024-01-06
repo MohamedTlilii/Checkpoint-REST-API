@@ -27,52 +27,59 @@ mongoose
 
 // Routes
 
-// Get all users
-app.get("/users", async (req, res) => {
-  try {
-    const data = await User.find();
-    res.status(200).json({ status: true, data });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ status: false, error: "Internal Server Error" });
-  }
-});
-
-// Add a new user
+//  POST :  Add a new user
 app.post("/addUser", async (req, res) => {
   try {
     const { name, age, favoriteFoods } = req.body;
-    const newUser = new User({
+    const newUser = await new User({
       name,
       age,
       favoriteFoods,
     });
     await newUser.save();
-    res.status(201).json({ status: true, message: "User added successfully" });
+    res.status(200).json({ status: true, message: "User added successfully" });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ status: false, error: "Internal Server Error" });
+    if (error) {
+      console.error(errors);
+    }
+    if (error.errors["name"]) {
+      res.status(401).json({ status: false, error: error.errors.name.message });
+    }
   }
 });
 
-// Edit a user by ID
-app.put("/editUser/:id", async (req, res) => {
+// GET :  Get all users
+app.get("/users", async (req, res) => {
   try {
-    const { name, age, favoriteFoods } = req.body;
-    const userId = req.params.id;
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      { name, age, favoriteFoods },
+    const data = await User.find();
+    res.status(200).json({ status: true, data });
+  } catch (error) {
+    if (error) throw error;
+  }
+});
+
+//PUT : Edit a user by ID
+app.put("/editUser", async (req, res) => {
+  try {
+    let { _id } = req.query;
+    let data = await User.findOneAndUpdate(
+      {
+        _id,
+      },
+      {
+        $set: {
+          ...req.body,
+        },
+      },
       { new: true }
     );
-    res.status(200).json({ status: true, data: updatedUser });
+    res.status(200).json({ status: true, data });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ status: false, error: "Internal Server Error" });
+    if (error) throw error;
   }
 });
 
-// Delete a user by ID
+//DELETE : Delete a user by ID
 app.delete("/deleteUser/:id", async (req, res) => {
   try {
     let { id } = req.params;
@@ -83,6 +90,7 @@ app.delete("/deleteUser/:id", async (req, res) => {
   }
 });
 // Start the server
-app.listen(5000, () => {
-  console.log(`Server is up and running on port 5000`);
+app.listen(5000, (err) => {
+  if (err) throw err;
+  console.log("server is up and running on  port 5000");
 });
